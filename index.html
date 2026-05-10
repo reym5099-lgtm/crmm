@@ -1,0 +1,5505 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales CRM — Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep: #000000;
+  --bg-card: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-hover: #1a1a1a;
+  --border: #1f1a10;
+  --border-active: #3d3420;
+  --text-primary: #f0e6d0;
+  --text-secondary: #b8a88a;
+  --text-muted: #6b5f4a;
+  --accent: #c9a84c;
+  --accent-glow: #c9a84c18;
+  --accent-bright: #e0c068;
+  --green: #a8b455;
+  --red: #c45c5c;
+  --amber: #c9a84c;
+  --cyan: #8aa8b8;
+  --violet: #9a8aaa;
+  --font: 'Outfit', -apple-system, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --mono: 'Outfit', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
+
+/* Layout */
+.app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.header { margin-bottom: 28px; }
+.header h1 {
+  font-size: 28px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  font-family: var(--font-display);
+  background: linear-gradient(135deg, #e0c068, #c9a84c, #a8882c);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+/* Setup Banner */
+.setup-banner {
+  background: var(--accent-glow);
+  border: 1px solid var(--accent)44;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.setup-banner input {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0;
+}
+.setup-banner .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* Stats */
+.stats-row {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 6px; margin-bottom: 20px;
+  scrollbar-width: none;
+}
+.stats-row::-webkit-scrollbar { display: none; }
+.stat-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.stat-chip:hover { border-color: var(--border-active); background: var(--bg-elevated); }
+.stat-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.stat-chip .count { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--accent-bright); }
+
+/* Controls */
+.controls {
+  display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.controls input, .controls select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.controls input:focus, .controls select:focus { border-color: var(--accent); }
+.controls input { flex: 1; min-width: 180px; }
+
+/* Buttons */
+.btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-primary { background: linear-gradient(135deg, #c9a84c, #a8882c); color: #000; font-weight: 600; }
+.btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-green { background: linear-gradient(135deg, #c9a84c, #a8882c); color: #000; font-weight: 600; }
+.btn-green:hover { filter: brightness(1.1); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover { border-color: var(--border-active); color: var(--text-primary); }
+.btn-danger { background: var(--red)22; color: var(--red); border: 1px solid var(--red)44; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+/* Contact List */
+.contact-list { display: flex; flex-direction: column; gap: 4px; }
+.contact-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.contact-row:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+  transform: translateX(2px);
+}
+.contact-row.overdue { border-left: 3px solid var(--red); }
+.stage-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.contact-info { flex: 1; min-width: 0; }
+.contact-name {
+  font-weight: 600; font-size: 14px; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
+}
+.contact-meta {
+  font-size: 12px; color: var(--text-muted); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.contact-right { text-align: right; flex-shrink: 0; }
+.contact-stage { font-size: 11px; font-weight: 600; }
+.contact-notes-count { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* Result count */
+.result-count { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+
+/* Detail View */
+.detail-view { animation: slideIn 0.2s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.detail-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.detail-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.detail-contacts { font-size: 13px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; }
+.detail-contacts a { color: var(--accent); text-decoration: none; }
+.detail-contacts a:hover { text-decoration: underline; }
+.detail-lead-date { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.detail-badges { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.badge {
+  padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* Panels */
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 700px) { .panel-grid { grid-template-columns: 1fr; } }
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.panel-title {
+  font-size: 11px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 10px;
+}
+.option-btn {
+  display: block; width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s;
+  margin-bottom: 2px;
+}
+.option-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.option-btn.active { border-color: currentColor; }
+
+/* Notes */
+.notes-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.note-entry {
+  border-left: 3px solid var(--accent)44;
+  padding-left: 12px;
+  margin-bottom: 14px;
+}
+.note-date { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.note-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+textarea {
+  width: 100%;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font);
+  min-height: 100px;
+  resize: vertical;
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+
+/* Add Contact Form */
+.add-form {
+  background: var(--bg-card);
+  border: 1px solid var(--accent)44;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  animation: slideIn 0.15s ease;
+}
+.add-form .form-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+}
+@media (max-width: 600px) { .add-form .form-row { grid-template-columns: 1fr; } }
+.add-form input {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+}
+.add-form .form-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+/* Date input */
+input[type="date"] {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  margin-top: 4px;
+  width: 100%;
+}
+select {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: var(--font);
+  margin-top: 4px;
+  width: 100%;
+}
+label { font-size: 12px; color: var(--text-muted); }
+
+/* Loading */
+.loading {
+  text-align: center; padding: 40px;
+  color: var(--text-muted); font-size: 14px;
+}
+.loading .spinner {
+  width: 30px; height: 30px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text-muted);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  z-index: 9999;
+  animation: toastIn 0.3s ease;
+  box-shadow: 0 8px 30px #00000060;
+}
+.toast.success { border-color: var(--green)66; }
+.toast.error { border-color: var(--red)66; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } }
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+
+<script>
+// ============================================================
+// CONFIG & STATE
+// ============================================================
+
+const PIPELINE_STAGES = [
+  { id: "new", label: "Neu / Unbearbeitet", color: "#6b5f4a", icon: "◯" },
+  { id: "contacted", label: "Kontaktiert", color: "#c9a84c", icon: "◉" },
+  { id: "qualified", label: "Qualifiziert", color: "#b8a88a", icon: "◈" },
+  { id: "link_sent", label: "Link gesendet", color: "#e0c068", icon: "▸" },
+  { id: "funnel_active", label: "Im Funnel aktiv", color: "#a8882c", icon: "◆" },
+  { id: "follow_up", label: "Follow-Up nötig", color: "#c45c5c", icon: "⚡" },
+  { id: "closed_won", label: "Abgeschlossen ✓", color: "#a8b455", icon: "✓" },
+  { id: "closed_lost", label: "Kein Interesse", color: "#5a5a5a", icon: "✗" },
+];
+
+const PRIORITY_LEVELS = [
+  { id: "hot", label: "🔥 Hot", color: "#f05c6e" },
+  { id: "warm", label: "🌡️ Warm", color: "#f0a030" },
+  { id: "cold", label: "❄️ Cold", color: "#64748b" },
+];
+
+const NEXT_ACTIONS = [
+  "Anruf zu Start des Funnels", "Feedback einholen"
+];
+
+const FUNNEL_STATUSES = [
+  { value: "", label: "— Nicht im Funnel —" },
+  { value: "entered", label: "Eingetreten" },
+  { value: "watching", label: "Schaut Video" },
+  { value: "engaged", label: "Interagiert" },
+  { value: "booking", label: "Termin gebucht" },
+  { value: "completed", label: "Durchlaufen" },
+  { value: "dropped", label: "Abgesprungen" },
+];
+
+let state = {
+  apiUrl: localStorage.getItem("crm_api_url") || "",
+  contacts: [],
+  loading: false,
+  view: "list",
+  selectedId: null,
+  search: "",
+  filterStage: "all",
+  filterPriority: "all",
+  sortBy: "name",
+  showAddForm: false,
+  showNoteForm: false,
+  noteText: "",
+  toastMsg: "",
+  toastType: "",
+};
+
+// ============================================================
+// API (Google Apps Script CORS-kompatibel)
+// Verwendet GET für Lesen, GET mit Payload-Chunks für Schreiben
+// ============================================================
+
+async function apiGet(action = "getAll") {
+  const url = `${state.apiUrl}?action=${action}`;
+  const res = await fetch(url, { redirect: "follow" });
+  return await res.json();
+}
+
+async function apiPost(body) {
+  // Daten als URL-Parameter senden (für kleine Payloads)
+  const encoded = encodeURIComponent(JSON.stringify(body));
+  const url = `${state.apiUrl}?action=post&payload=${encoded}`;
+  const res = await fetch(url, { redirect: "follow" });
+  return await res.json();
+}
+
+async function loadContacts() {
+  if (!state.apiUrl) return;
+  state.loading = true;
+  render();
+  try {
+    const result = await apiGet("getAll");
+    if (result.success) {
+      state.contacts = result.data.map(c => ({
+        ...c,
+        notes: Array.isArray(c.notes) ? c.notes : []
+      }));
+      showToast("Kontakte geladen (" + state.contacts.length + ")", "success");
+    } else {
+      showToast("Fehler: " + result.error, "error");
+    }
+  } catch (e) {
+    showToast("Verbindungsfehler: " + e.message, "error");
+  }
+  state.loading = false;
+  render();
+}
+
+async function saveContact(contact) {
+  try {
+    const result = await apiPost({ action: "update", data: contact });
+    if (!result.success) {
+      showToast("Fehler: " + result.error, "error");
+    }
+  } catch (e) {
+    showToast("Speichern fehlgeschlagen", "error");
+  }
+}
+
+async function createContact(data) {
+  try {
+    data.id = genId();
+    data.leadDate = new Date().toISOString().split("T")[0];
+    data.stage = "new";
+    data.priority = "cold";
+    data.notes = [];
+    const result = await apiPost({ action: "create", data });
+    if (result.success) {
+      state.contacts.unshift(data);
+      showToast("Kontakt angelegt ✓", "success");
+    } else {
+      showToast("Fehler: " + result.error, "error");
+    }
+  } catch (e) {
+    showToast("Anlegen fehlgeschlagen", "error");
+  }
+  render();
+}
+
+// Import in kleinen Batches (je 5 Kontakte pro Request)
+async function importInitialData() {
+  const BATCH_SIZE = 5;
+  const total = INITIAL_CONTACTS.length;
+  let imported = 0;
+  let errors = 0;
+  
+  showToast("Importiere " + total + " Kontakte...", "success");
+  
+  for (let i = 0; i < total; i += BATCH_SIZE) {
+    const batch = INITIAL_CONTACTS.slice(i, i + BATCH_SIZE);
+    try {
+      const result = await apiPost({ action: "bulkCreate", data: batch });
+      if (result.success) {
+        imported += batch.length;
+        showToast("Importiert: " + imported + " / " + total, "success");
+      } else {
+        errors += batch.length;
+      }
+    } catch (e) {
+      errors += batch.length;
+    }
+    // Kurze Pause damit Google nicht drosselt
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  if (errors > 0) {
+    showToast("Import fertig. " + imported + " OK, " + errors + " Fehler.", "error");
+  } else {
+    showToast("Alle " + imported + " Kontakte importiert! ✓", "success");
+  }
+  
+  await loadContacts();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function genId() { return Math.random().toString(36).substr(2, 8); }
+
+function formatDate(d) {
+  if (!d) return "";
+  const parts = String(d).split("-");
+  if (parts.length !== 3) return d;
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+function stageInfo(id) {
+  return PIPELINE_STAGES.find(s => s.id === id) || PIPELINE_STAGES[0];
+}
+
+function getSelected() {
+  return state.contacts.find(c => c.id === state.selectedId);
+}
+
+function updateSelected(updates, skipRender) {
+  const idx = state.contacts.findIndex(c => c.id === state.selectedId);
+  if (idx === -1) return;
+  Object.assign(state.contacts[idx], updates);
+  // Speichern mit Debounce damit nicht jeder Tastendruck einen API-Call auslöst
+  clearTimeout(state._saveTimer);
+  state._saveTimer = setTimeout(() => {
+    saveContact(state.contacts[idx]);
+  }, 500);
+  if (!skipRender) render();
+}
+
+// Für Datum/Select-Felder: Speichern ohne sofortiges Re-Render
+function updateSelectedQuiet(updates) {
+  const idx = state.contacts.findIndex(c => c.id === state.selectedId);
+  if (idx === -1) return;
+  Object.assign(state.contacts[idx], updates);
+  clearTimeout(state._saveTimer);
+  state._saveTimer = setTimeout(() => {
+    saveContact(state.contacts[idx]);
+    render(); // Erst nach dem Speichern rendern
+  }, 800);
+}
+
+function showToast(msg, type) {
+  state.toastMsg = msg;
+  state.toastType = type;
+  render();
+  setTimeout(() => { state.toastMsg = ""; render(); }, 3000);
+}
+
+function getFiltered() {
+  let list = [...state.contacts];
+  if (state.search) {
+    const s = state.search.toLowerCase();
+    list = list.filter(c =>
+      (c.name || "").toLowerCase().includes(s) ||
+      (c.email || "").toLowerCase().includes(s) ||
+      (c.phone || "").includes(s)
+    );
+  }
+  if (state.filterStage !== "all") list = list.filter(c => c.stage === state.filterStage);
+  if (state.filterPriority !== "all") list = list.filter(c => c.priority === state.filterPriority);
+
+  const sortFns = {
+    name: (a, b) => (a.name || "").localeCompare(b.name || ""),
+    date: (a, b) => (b.leadDate || "").localeCompare(a.leadDate || ""),
+    stage: (a, b) => PIPELINE_STAGES.findIndex(s => s.id === a.stage) - PIPELINE_STAGES.findIndex(s => s.id === b.stage),
+    priority: (a, b) => { const o = { hot: 0, warm: 1, cold: 2 }; return (o[a.priority] || 2) - (o[b.priority] || 2); }
+  };
+  list.sort(sortFns[state.sortBy] || sortFns.name);
+  return list;
+}
+
+function getStats() {
+  const s = {};
+  PIPELINE_STAGES.forEach(st => s[st.id] = state.contacts.filter(c => c.stage === st.id).length);
+  s.total = state.contacts.length;
+  return s;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function render() {
+  const app = document.getElementById("app");
+
+  if (!state.apiUrl) {
+    app.innerHTML = renderSetup();
+    return;
+  }
+
+  if (state.view === "detail" && state.selectedId) {
+    app.innerHTML = renderDetail();
+  } else {
+    app.innerHTML = renderList();
+  }
+
+  if (state.toastMsg) {
+    app.innerHTML += `<div class="toast ${state.toastType}">${esc(state.toastMsg)}</div>`;
+  }
+}
+
+function renderSetup() {
+  return `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:80vh;">
+      <div class="setup-banner" style="max-width:550px;width:100%;">
+        <h2 style="font-size:20px;margin-bottom:6px;">Sales CRM Setup</h2>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+          Füge deine Google Apps Script URL ein, um das CRM mit deinem Sheet zu verbinden.
+        </p>
+        <input id="apiUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+          value="${esc(state.apiUrl)}">
+        <div class="hint">Die URL findest du unter: Apps Script → Bereitstellen → Web-App-URL</div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;">
+          <button class="btn btn-primary" onclick="connectApi()">Verbinden</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderList() {
+  const filtered = getFiltered();
+  const stats = getStats();
+
+  let html = `
+    <div class="header">
+      <h1>Sales CRM</h1>
+      <p>Link → Funnel Pipeline · ${state.contacts.length} Kontakte</p>
+    </div>
+
+    <div class="stats-row">
+      ${PIPELINE_STAGES.map(s => `
+        <div class="stat-chip ${state.filterStage === s.id ? 'active' : ''}"
+          style="${state.filterStage === s.id ? `border-color:${s.color};color:${s.color};background:${s.color}18` : ''}"
+          onclick="toggleFilter('${s.id}')">
+          <span class="count">${stats[s.id] || 0}</span>
+          <span>${s.label}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="controls">
+      <input type="text" placeholder="🔍 Name, E-Mail oder Telefon... (Enter)"
+        value="${esc(state.search)}" onkeydown="if(event.key==='Enter'){state.search=this.value;render()}">
+      <select onchange="state.filterPriority=this.value;render()">
+        <option value="all">Alle Prioritäten</option>
+        ${PRIORITY_LEVELS.map(p => `<option value="${p.id}" ${state.filterPriority === p.id ? 'selected' : ''}>${p.label}</option>`).join('')}
+      </select>
+      <select onchange="state.sortBy=this.value;render()">
+        <option value="name" ${state.sortBy === 'name' ? 'selected' : ''}>A–Z</option>
+        <option value="date" ${state.sortBy === 'date' ? 'selected' : ''}>Neueste zuerst</option>
+        <option value="stage" ${state.sortBy === 'stage' ? 'selected' : ''}>Pipeline-Stufe</option>
+        <option value="priority" ${state.sortBy === 'priority' ? 'selected' : ''}>Priorität</option>
+      </select>
+      <button class="btn btn-primary" onclick="state.showAddForm=!state.showAddForm;render()">+ Kontakt</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('csvUpload').click()">📁 Datei importieren</button>
+      <input type="file" id="csvUpload" accept=".csv,.xlsx,.xls,.txt" style="display:none" onchange="handleFileImport(this)">
+      <button class="btn btn-ghost btn-sm" onclick="loadContacts()">↻ Neu laden</button>
+      <button class="btn btn-ghost btn-sm" onclick="disconnectApi()">⚙ API</button>
+    </div>
+  `;
+
+  if (state.showAddForm) {
+    html += `
+      <div class="add-form">
+        <div class="form-row">
+          <input id="newName" placeholder="Name *">
+          <input id="newEmail" placeholder="E-Mail">
+          <input id="newPhone" placeholder="Telefon">
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-green btn-sm" onclick="addContact()">Anlegen</button>
+          <button class="btn btn-ghost btn-sm" onclick="state.showAddForm=false;render()">Abbrechen</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (state.contacts.length === 0 && !state.loading) {
+    html += `
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <div style="font-size:16px;margin-bottom:8px;">Noch keine Kontakte vorhanden</div>
+        <button class="btn btn-primary" onclick="importInitialData()" style="margin-top:12px;">
+          276 Kontakte importieren
+        </button>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+          Importiert die Leads aus deiner Excel-Datei
+        </div>
+      </div>
+    `;
+  } else if (state.loading) {
+    html += `<div class="loading"><div class="spinner"></div>Lade Kontakte...</div>`;
+  } else {
+    html += `<div class="result-count">${filtered.length} von ${state.contacts.length} Kontakten`;
+    if (state.filterStage !== "all") html += ` · ${stageInfo(state.filterStage).label}`;
+    html += `</div>`;
+
+    html += `<div class="contact-list">`;
+    for (const c of filtered) {
+      const si = stageInfo(c.stage);
+      const pri = PRIORITY_LEVELS.find(p => p.id === c.priority);
+      const isOverdue = c.nextActionDate && new Date(c.nextActionDate) < new Date();
+      html += `
+        <div class="contact-row ${isOverdue ? 'overdue' : ''}" onclick="openContact('${c.id}')">
+          <div class="stage-dot" style="color:${si.color};background:${si.color}"></div>
+          <div class="contact-info">
+            <div class="contact-name">
+              ${esc(c.name)}
+              ${pri ? `<span style="font-size:12px">${pri.label.split(' ')[0]}</span>` : ''}
+              ${isOverdue ? `<span style="font-size:11px;color:var(--red);font-weight:600">⚠ Überfällig</span>` : ''}
+            </div>
+            <div class="contact-meta">
+              ${esc(c.email || '')}
+              ${c.nextAction ? ' · ' + esc(c.nextAction) : ''}
+              ${c.nextActionDate ? ' · bis ' + formatDate(c.nextActionDate) : ''}
+            </div>
+          </div>
+          <div class="contact-right">
+            <div class="contact-stage" style="color:${si.color}">${si.label}</div>
+            <div class="contact-notes-count">${(c.notes || []).length} Notizen</div>
+          </div>
+        </div>
+      `;
+    }
+    html += `</div>`;
+
+    if (filtered.length === 0) {
+      html += `
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <div>Keine Kontakte gefunden</div>
+          <div style="font-size:13px;margin-top:4px">Filter oder Suchbegriff anpassen</div>
+        </div>
+      `;
+    }
+  }
+
+  return html;
+}
+
+function renderDetail() {
+  const c = getSelected();
+  if (!c) { state.view = "list"; return renderList(); }
+
+  const si = stageInfo(c.stage);
+  const pri = PRIORITY_LEVELS.find(p => p.id === c.priority);
+
+  let html = `<div class="detail-view">`;
+
+  // Back button
+  html += `<button class="btn btn-ghost btn-sm" onclick="state.view='list';state.selectedId=null;render()" style="margin-bottom:16px;">← Zurück zur Liste</button>`;
+
+  // Header
+  html += `
+    <div class="detail-header">
+      <div class="detail-name">${esc(c.name)}</div>
+      <div class="detail-contacts">
+        <span>📧 <a href="mailto:${esc(c.email)}">${esc(c.email || '—')}</a></span>
+        <span>📱 <a href="tel:${esc(c.phone)}">${esc(c.phone || '—')}</a></span>
+      </div>
+      <div class="detail-lead-date">Lead seit: ${formatDate(c.leadDate)}${c.lastContactDate ? ' · Letzter Kontakt: ' + formatDate(c.lastContactDate) : ''}</div>
+      <div class="detail-badges">
+        <span class="badge" style="background:${si.color}18;color:${si.color};border-color:${si.color}44">${si.icon} ${si.label}</span>
+        ${pri ? `<span class="badge" style="background:${pri.color}18;color:${pri.color};border-color:${pri.color}44">${pri.label}</span>` : ''}
+        ${c.nextAction ? `<span class="badge" style="background:var(--accent-glow);color:var(--accent);border-color:var(--accent)">→ ${esc(c.nextAction)}</span>` : ''}
+      </div>
+    </div>
+  `;
+
+  // Panels
+  html += `<div class="panel-grid">`;
+
+  // Pipeline Stage
+  html += `<div class="panel"><div class="panel-title">Pipeline-Stufe</div>`;
+  for (const s of PIPELINE_STAGES) {
+    const active = c.stage === s.id;
+    html += `<button class="option-btn ${active ? 'active' : ''}"
+      style="${active ? `color:${s.color};border-color:${s.color}66;background:${s.color}12` : ''}"
+      onclick="updateSelected({stage:'${s.id}'})">${s.icon} ${s.label}</button>`;
+  }
+  html += `</div>`;
+
+  // Priority + Next Action
+  html += `<div class="panel">`;
+  html += `<div class="panel-title">Priorität</div>`;
+  for (const p of PRIORITY_LEVELS) {
+    const active = c.priority === p.id;
+    html += `<button class="option-btn ${active ? 'active' : ''}"
+      style="${active ? `color:${p.color};border-color:${p.color}66;background:${p.color}12` : ''}"
+      onclick="updateSelected({priority:'${p.id}'})">${p.label}</button>`;
+  }
+  html += `<div class="panel-title" style="margin-top:16px;">Nächste Aktion</div>`;
+  for (const a of NEXT_ACTIONS) {
+    const active = c.nextAction === a;
+    html += `<button class="option-btn ${active ? 'active' : ''}"
+      style="${active ? 'color:var(--accent);border-color:var(--accent);background:var(--accent-glow)' : ''}"
+      onclick="updateSelected({nextAction:'${esc(a)}'})">${esc(a)}</button>`;
+  }
+  html += `
+    <div style="margin-top:12px;">
+      <label>Follow-Up Datum</label>
+      <input type="date" value="${c.nextActionDate || ''}"
+        onchange="updateSelectedQuiet({nextActionDate:this.value})">
+    </div>
+  </div>`;
+
+  html += `</div>`; // end panel-grid
+
+  // Link & Funnel
+  html += `
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-title">Link & Funnel</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label>Link gesendet am</label>
+          <input type="date" value="${c.linkSentDate || ''}"
+            onchange="updateSelectedQuiet({linkSentDate:this.value})">
+        </div>
+        <div>
+          <label>Funnel-Status</label>
+          <select onchange="updateSelectedQuiet({funnelStatus:this.value})">
+            ${FUNNEL_STATUSES.map(f => `<option value="${f.value}" ${c.funnelStatus === f.value ? 'selected' : ''}>${f.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Notes
+  html += `
+    <div class="notes-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="panel-title" style="margin:0;">Gesprächsnotizen</div>
+        <button class="btn btn-primary btn-sm" onclick="state.showNoteForm=true;render()">+ Notiz</button>
+      </div>
+  `;
+
+  if (state.showNoteForm) {
+    html += `
+      <div style="margin-bottom:16px;">
+        <textarea id="noteInput" placeholder="Was wurde besprochen? Einwände? Interesse? Nächste Schritte?">${esc(state.noteText)}</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-green btn-sm" onclick="addNote()">Speichern</button>
+          <button class="btn btn-ghost btn-sm" onclick="state.showNoteForm=false;state.noteText='';render()">Abbrechen</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const notes = [...(c.notes || [])].reverse();
+  if (notes.length === 0) {
+    html += `<div style="color:var(--text-muted);font-size:14px;font-style:italic;">Noch keine Notizen vorhanden.</div>`;
+  }
+  for (const n of notes) {
+    html += `
+      <div class="note-entry">
+        <div class="note-date">${formatDate(n.date)}${n.type === 'import' ? ' · Import' : ''}</div>
+        <div class="note-text">${esc(n.text)}</div>
+      </div>
+    `;
+  }
+  html += `</div>`; // end notes-section
+  html += `</div>`; // end detail-view
+
+  return html;
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+
+function connectApi() {
+  const url = document.getElementById("apiUrlInput").value.trim();
+  if (!url) return;
+  state.apiUrl = url;
+  localStorage.setItem("crm_api_url", url);
+  render();
+  loadContacts();
+}
+
+function disconnectApi() {
+  if (confirm("API-Verbindung trennen? Du kannst eine neue URL eingeben.")) {
+    state.apiUrl = "";
+    state.contacts = [];
+    localStorage.removeItem("crm_api_url");
+    render();
+  }
+}
+
+function toggleFilter(stageId) {
+  state.filterStage = state.filterStage === stageId ? "all" : stageId;
+  render();
+}
+
+function openContact(id) {
+  state.selectedId = id;
+  state.view = "detail";
+  state.showNoteForm = false;
+  state.noteText = "";
+  // Automatisch auf "Kontaktiert" setzen wenn noch "Neu"
+  const contact = state.contacts.find(c => c.id === id);
+  if (contact && contact.stage === "new") {
+    contact.stage = "contacted";
+    contact.lastContactDate = new Date().toISOString().split("T")[0];
+    saveContact(contact);
+  }
+  render();
+  window.scrollTo(0, 0);
+}
+
+function addContact() {
+  const name = document.getElementById("newName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const phone = document.getElementById("newPhone").value.trim();
+  if (!name) { showToast("Name ist erforderlich", "error"); return; }
+  createContact({ name, email, phone, nextAction: "", nextActionDate: "", linkSentDate: "", funnelStatus: "", lastContactDate: "" });
+  state.showAddForm = false;
+}
+
+// ============================================================
+// DATEI-IMPORT (CSV, TXT, Excel-kompatible CSV)
+// ============================================================
+// Erwartetes Format: Spalten mit Name, E-Mail, Telefon
+// Die Datei kann Spaltenüberschriften haben oder direkt Daten
+// Trennzeichen: Komma, Semikolon oder Tab werden erkannt
+
+async function handleFileImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  showToast("Lese Datei: " + file.name + "...", "success");
+  
+  const text = await file.text();
+  const contacts = parseCSV(text);
+  
+  if (contacts.length === 0) {
+    showToast("Keine Kontakte in der Datei gefunden", "error");
+    input.value = "";
+    return;
+  }
+  
+  // Vorschau zeigen
+  const preview = contacts.slice(0, 3).map(c => c.name).join(", ");
+  const doImport = confirm(
+    contacts.length + " Kontakte gefunden.\n\n" +
+    "Vorschau: " + preview + (contacts.length > 3 ? " ..." : "") + "\n\n" +
+    "Jetzt importieren?"
+  );
+  
+  if (!doImport) {
+    input.value = "";
+    return;
+  }
+  
+  // In Batches importieren
+  const BATCH_SIZE = 5;
+  let imported = 0;
+  let errors = 0;
+  
+  for (let i = 0; i < contacts.length; i += BATCH_SIZE) {
+    const batch = contacts.slice(i, i + BATCH_SIZE);
+    try {
+      const result = await apiPost({ action: "bulkCreate", data: batch });
+      if (result.success) {
+        imported += batch.length;
+        showToast("Importiert: " + imported + " / " + contacts.length, "success");
+      } else {
+        errors += batch.length;
+      }
+    } catch (e) {
+      errors += batch.length;
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  if (errors > 0) {
+    showToast("Import: " + imported + " OK, " + errors + " Fehler", "error");
+  } else {
+    showToast("Alle " + imported + " Kontakte importiert ✓", "success");
+  }
+  
+  input.value = "";
+  await loadContacts();
+}
+
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) return [];
+  
+  // Trennzeichen erkennen (Semikolon, Komma oder Tab)
+  const firstLine = lines[0];
+  let sep = ",";
+  if (firstLine.split(";").length > firstLine.split(",").length) sep = ";";
+  if (firstLine.split("\t").length > firstLine.split(sep).length) sep = "\t";
+  
+  const rows = lines.map(l => l.split(sep).map(c => c.trim().replace(/^["']|["']$/g, "")));
+  
+  // Header erkennen — wenn erste Zeile typische Header-Wörter enthält
+  const headerWords = ["name", "email", "e-mail", "mail", "telefon", "phone", "tel", "vorname", "nachname"];
+  const firstRowLower = rows[0].map(c => c.toLowerCase());
+  const hasHeader = firstRowLower.some(c => headerWords.includes(c));
+  
+  let nameCol = -1, emailCol = -1, phoneCol = -1;
+  
+  if (hasHeader) {
+    // Spalten anhand Header zuordnen
+    firstRowLower.forEach((h, i) => {
+      if (h === "name" || h === "vollständiger name" || h === "kontakt") nameCol = i;
+      if (h === "vorname" && nameCol === -1) nameCol = i; // Vorname als Fallback
+      if (h === "email" || h === "e-mail" || h === "mail" || h === "e-mail-adresse") emailCol = i;
+      if (h === "telefon" || h === "phone" || h === "tel" || h === "telefonnummer" || h === "handy" || h === "mobil") phoneCol = i;
+    });
+    rows.shift(); // Header-Zeile entfernen
+  } else {
+    // Ohne Header: Spalten anhand Inhalt erkennen
+    const sample = rows[0];
+    sample.forEach((val, i) => {
+      if (val.includes("@")) emailCol = i;
+      else if (/^\+?\d[\d\s\-\/]{6,}$/.test(val.replace(/\s/g, ""))) phoneCol = i;
+      else if (nameCol === -1 && /^[A-Za-zÄÖÜäöüß\s\-\.]+$/.test(val) && val.length > 2) nameCol = i;
+    });
+  }
+  
+  // Fallback: erste 3 Spalten als Name, Email, Phone
+  if (nameCol === -1) nameCol = 0;
+  if (emailCol === -1) emailCol = Math.min(1, rows[0]?.length - 1 || 0);
+  if (phoneCol === -1) phoneCol = Math.min(2, rows[0]?.length - 1 || 0);
+  
+  const today = new Date().toISOString().split("T")[0];
+  const contacts = [];
+  
+  for (const row of rows) {
+    const name = row[nameCol] || "";
+    if (!name || name.length < 2) continue;
+    
+    contacts.push({
+      id: genId(),
+      name: name,
+      email: row[emailCol] || "",
+      phone: row[phoneCol] || "",
+      leadDate: today,
+      stage: "new",
+      priority: "cold",
+      nextAction: "",
+      nextActionDate: "",
+      linkSentDate: "",
+      funnelStatus: "",
+      lastContactDate: "",
+      notes: []
+    });
+  }
+  
+  return contacts;
+}
+
+function addNote() {
+  const textarea = document.getElementById("noteInput");
+  const text = textarea ? textarea.value.trim() : "";
+  if (!text) return;
+  const c = getSelected();
+  if (!c) return;
+  const note = { id: genId(), text, date: new Date().toISOString().split("T")[0], type: "manual" };
+  const updatedNotes = [...(c.notes || []), note];
+  const today = new Date().toISOString().split("T")[0];
+  updateSelected({ notes: updatedNotes, lastContactDate: today });
+  state.showNoteForm = false;
+  state.noteText = "";
+}
+
+function esc(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+// ============================================================
+// INITIAL CONTACTS (for first import)
+// ============================================================
+
+const INITIAL_CONTACTS = [
+{
+"id": "c001",
+"name": "Anton Rümmele",
+"email": "ar401@t-online.de",
+"phone": "+491715155749",
+"leadDate": "2023-08-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n1",
+"text": "ab hier Maurice",
+"date": "2023-08-17",
+"type": "import"
+}
+]
+},
+{
+"id": "c002",
+"name": "Janina Dotzauer Dotzauer",
+"email": "erfolgreichleben40@gmail.com",
+"phone": "+4901702925389",
+"leadDate": "2023-08-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c003",
+"name": "Dennis Hauck",
+"email": "hauck.dns@gmail.com",
+"phone": "+49017631618574",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c004",
+"name": "Dominik Hummel",
+"email": "dominik_hummel@web.de",
+"phone": "+4991147790814",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c005",
+"name": "Tamara / Tina Augstein/Guil",
+"email": "tinaguil1979@gmail.com",
+"phone": "+4917677838080",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c006",
+"name": "Lucia Czopko",
+"email": "Czopkolucia@gmail.com",
+"phone": "+4915773378879",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c007",
+"name": "Cornelia Sailer",
+"email": "sinnvollversichert@gmail.com",
+"phone": "+4915101492461",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c008",
+"name": "Felix Fastenrath",
+"email": "felix.fastenrath@hotmail.com",
+"phone": "+491792609511",
+"leadDate": "2023-08-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c009",
+"name": "Karla Gebser",
+"email": "karlagebser@gmail.com",
+"phone": "+4915156197620",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c010",
+"name": "Miriam Schimmel",
+"email": "miriam.schimmel@gmail.com",
+"phone": "+491773298440",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c011",
+"name": "Tom Dassel",
+"email": "1tombue69@gmail.vom",
+"phone": "+4917198712367",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c012",
+"name": "Angela Jellbauer",
+"email": "andreas.jellbauer.hof@gmail.com",
+"phone": "+49092811609494",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c013",
+"name": "Kathleen Tuebbecke",
+"email": "k.tuebbecke@consila.de",
+"phone": "+4901743844268",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c014",
+"name": "Leif-Torben Stein",
+"email": "arko.stein@me.com",
+"phone": "+491711985209",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c015",
+"name": "Anke Sommer",
+"email": "Ankes6812@gmail.com",
+"phone": "+49015205973909",
+"leadDate": "2023-08-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c016",
+"name": "Sven Stocker",
+"email": "nature.personal.training@gmail.com",
+"phone": "+4901637713508",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c017",
+"name": "Wey Chung Shin",
+"email": "nymphets2@protonmail.com",
+"phone": "+491785732020",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c018",
+"name": "Sven Messing",
+"email": "s.messing47@gmail.com",
+"phone": "+4915221044541",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c019",
+"name": "Justin Marciniak",
+"email": "marciniak.justin@gmail.com",
+"phone": "+491733420622",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c020",
+"name": "Agron Halilaj",
+"email": "j.connor1@gmx.de",
+"phone": "+491629211973",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c021",
+"name": "Matthias Meier",
+"email": "Matthiasm.98@web.de",
+"phone": "+4916090591180",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c022",
+"name": "Carsten Colonius",
+"email": "Carsten.Colonius@hotmail.de",
+"phone": "+491729938297",
+"leadDate": "2023-08-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c023",
+"name": "Jasmin Werthenbach",
+"email": "jasmin.nejad@web.de",
+"phone": "+499098346",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c024",
+"name": "Philipp Bommersheim",
+"email": "Phil.bommi@freenet.de",
+"phone": "+4915752129032",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c025",
+"name": "Kim-Luca Fritz",
+"email": "Kim-Luca@outlook.de",
+"phone": "+4917641545498",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c026",
+"name": "Bernd Dippell",
+"email": "woy@gmx-topmail.de",
+"phone": "+490123456789",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c027",
+"name": "Josephine Ginuth",
+"email": "josephine_ginuth@freenet.de",
+"phone": "+4901736465599",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c028",
+"name": "Marcus Weppler",
+"email": "marcus.weppler@hotmail.de",
+"phone": "+491724822534",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c029",
+"name": "Hardy Niemann",
+"email": "easybln@icloud.com",
+"phone": "+4917681395951",
+"leadDate": "2023-08-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c030",
+"name": "Roberto Coricciati",
+"email": "Roberto.coricciati@posteo.de",
+"phone": "+4917656845181",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c031",
+"name": "Felix Haase",
+"email": "felixh342@gmail.com",
+"phone": "+4901629167787",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c032",
+"name": "Jan Behrens",
+"email": "jpbehrens.de@gmail.com",
+"phone": "+49017640591511",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c033",
+"name": "Nicole Stenglein",
+"email": "nicole.stenglein@gmx.net",
+"phone": "+49017654873160",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c034",
+"name": "Daniel Blanchard",
+"email": "Werbekontakt@gmail.com",
+"phone": "+4915165916244",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c035",
+"name": "Valentina Finestra",
+"email": "Valentina.finestra@web.de",
+"phone": "+491785807133",
+"leadDate": "2023-08-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c036",
+"name": "Klaus Kruger",
+"email": "Kruger-coaching@web.de",
+"phone": "=+490178 5545877",
+"leadDate": "2023-08-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c037",
+"name": "Jennifer Schell",
+"email": "Jennifer.schell@dvag.de",
+"phone": "+4915164935787",
+"leadDate": "2023-08-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c038",
+"name": "Stefan Zeller",
+"email": "stefan.zeller85@gmail.com",
+"phone": "+49017661004707",
+"leadDate": "2023-08-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c039",
+"name": "Oliver Schombierski",
+"email": "mara.oymanns@outlook.de",
+"phone": "+491733443451",
+"leadDate": "2023-08-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c040",
+"name": "Marko Werner",
+"email": "markowerner7@gmail.com",
+"phone": "+4917630302064",
+"leadDate": "2023-08-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c041",
+"name": "Konrad Fröhlich",
+"email": "konradefroehlich@gmail.com",
+"phone": "+4917641511230",
+"leadDate": "2023-08-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c042",
+"name": "Vicky Hoffstadt",
+"email": "caviho1986@gmail.com",
+"phone": "+4915738342468",
+"leadDate": "2023-08-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c043",
+"name": "Jochen Schneider",
+"email": "j.schneider1610@web.de",
+"phone": "+4924226531",
+"leadDate": "2023-08-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c044",
+"name": "Jannik Kretschmer",
+"email": "jannik.kretsche@icloud.com",
+"phone": "+4915785515508",
+"leadDate": "2023-08-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c045",
+"name": "Josephine Richter",
+"email": "josiii411@gmail.com",
+"phone": "+491736224984",
+"leadDate": "2023-08-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c046",
+"name": "Susa Knigge",
+"email": "Susaknigge@outlook.com",
+"phone": "+4917655181817",
+"leadDate": "2023-08-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c047",
+"name": "Margarita Mowinski",
+"email": "m.mowinski@gmx.de",
+"phone": "+49016095623935",
+"leadDate": "2023-08-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c048",
+"name": "Michael Täubert",
+"email": "m.taeubert@taeubert-design.de",
+"phone": "+49016090629324",
+"leadDate": "2023-08-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c049",
+"name": "Stelaki Samaras",
+"email": "janni.sa@hotmail.de",
+"phone": "+4901632361185",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c050",
+"name": "Timo Weimann",
+"email": "tw21380@icloud.com",
+"phone": "+4915778904590",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c051",
+"name": "Kristina Fahr",
+"email": "kristina.fahr@hotmail.com",
+"phone": "=+490174 1791570",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c052",
+"name": "Melanie Königseder",
+"email": "Mela.koe@web.de",
+"phone": "+4917631601208",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c053",
+"name": "Erwin Spence",
+"email": "Spenceerwin@web.de",
+"phone": "+4901784145009",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c054",
+"name": "Michael Aders",
+"email": "michaeladers@web.de",
+"phone": "+491722948379",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c055",
+"name": "Lydia Baumann",
+"email": "Lydia-b@gmx.net",
+"phone": "+491234567890",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c056",
+"name": "Rudi Ahner",
+"email": "rudiahner@googlemail.com",
+"phone": "+4943219651574",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c057",
+"name": "Lisa Schiller",
+"email": "Lisa-marie.schiller@gmx.net",
+"phone": "+491728241000",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c058",
+"name": "Danijel Kahlina",
+"email": "kahlinadanijel@gmail.com",
+"phone": "+49017663725412",
+"leadDate": "2023-08-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c059",
+"name": "Mirko Riedel",
+"email": "maikcapetown@gmail.com",
+"phone": "+4915123005428",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c060",
+"name": "Hans-Jürgen Müller-Alex",
+"email": "info@asieben.de",
+"phone": "+495111217712",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c061",
+"name": "Raphael Stark",
+"email": "raphael_della_porta@gmx.de",
+"phone": "+491773697206",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c062",
+"name": "Daniel Matrisotto",
+"email": "kontakt@anturo.de",
+"phone": "+49015114926753",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c063",
+"name": "Carl Rausch",
+"email": "rausch-carl@web.de",
+"phone": "+4917680753872",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c064",
+"name": "Nicolas von Wilcke",
+"email": "nw@clear-light.de",
+"phone": "+4901726774606",
+"leadDate": "2023-08-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c065",
+"name": "Rilinda Arifi",
+"email": "linda.adnil.la@gmail.com",
+"phone": "+491784723724",
+"leadDate": "2023-08-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c066",
+"name": "Hassan Noureddine",
+"email": "business.noureddine@gmail.com",
+"phone": "+4915783025824",
+"leadDate": "2023-08-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c067",
+"name": "Carla Edelmann",
+"email": "carla.edelmann.ce@gmail.com",
+"phone": "+4915224429221",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c068",
+"name": "jan buhrmann",
+"email": "janbuhrmann@icloud.com",
+"phone": "+4901636704364",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c069",
+"name": "Mario Hessen",
+"email": "mariohessen@gmail.com",
+"phone": "+4915778801194",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c070",
+"name": "Alexander Benit",
+"email": "alexander.benit@live.de",
+"phone": "+4911111111",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c071",
+"name": ". Haji Morteza Gholi",
+"email": "k.gholi@outlook.com",
+"phone": "+49017583638483",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c072",
+"name": "Robert Saeedi",
+"email": "robert80636@web.de",
+"phone": "+491723033690",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c073",
+"name": "Maike Thomsen",
+"email": "Thomsen.maike@googlemail.com",
+"phone": "+4916094450533",
+"leadDate": "2023-08-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c074",
+"name": "Birke Wienke",
+"email": "birkewienke@gmx.de",
+"phone": "+491624126073",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c075",
+"name": "Nina Spill",
+"email": "nina.spill@gmx.net",
+"phone": "+4915906523180",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c076",
+"name": "Matthias Loos",
+"email": "praxis@rucat.de",
+"phone": "+494901796856141",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c077",
+"name": "Karl Ruben",
+"email": "kkruben@googlemail.com",
+"phone": "+4915771597858",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c078",
+"name": "Inna Laudenschläger",
+"email": "laudenschlaegerinna@gmail.com",
+"phone": "+4917676710130",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c079",
+"name": "Xenia Sellerer",
+"email": "Xenia.sellerer@gmx.de",
+"phone": "+4917699809064",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c080",
+"name": "Bernd Janeke",
+"email": "bernd.janeke@gmail.com",
+"phone": "+4901601134580",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c081",
+"name": "Marco Lacina",
+"email": "m.lacina@web.de",
+"phone": "+4917623941646",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c082",
+"name": "Robin Hauger",
+"email": "thanator2404@gmail.com",
+"phone": "+4901732804820",
+"leadDate": "2023-08-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c083",
+"name": "1Klang Immobilien Versicherung",
+"email": "info@1klng.de",
+"phone": "+4901727502663",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c084",
+"name": "Anja Oster",
+"email": "anja@genussphase.de",
+"phone": "+4915118494104",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c085",
+"name": "Daniel Borge",
+"email": "Daniel.borgerivera@gmail.com",
+"phone": "+4977777778",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c086",
+"name": "Manuel Pataky",
+"email": "M.Pataky@ez-m.de",
+"phone": "+491768008812",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c087",
+"name": "Rene Wassong",
+"email": "rewassong@gmail.com",
+"phone": "+491726011044",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c088",
+"name": "Robert Weisbrod",
+"email": "mc.brezmaster@web.de",
+"phone": "+491755861489",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c089",
+"name": "Christina Rink",
+"email": "rinkchristina@gmx.de",
+"phone": "+49015142414867",
+"leadDate": "2023-08-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c090",
+"name": "luettmann ralf",
+"email": "ralf.luettmann@me.com",
+"phone": "+49015158746997",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c091",
+"name": "Momme Thormählen",
+"email": "mommethormaehlen@googlemail.com",
+"phone": "+491742471351",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c092",
+"name": "Tim Voigt",
+"email": "timsiebrecht@yahoo.de",
+"phone": "+4901774720583",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c093",
+"name": "Elena Pepe",
+"email": "elenapep20@gmx.de",
+"phone": "+4901762449805",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c094",
+"name": "Vanessa Haser",
+"email": "laura.shana.mohn@icloud.com",
+"phone": "+4917640152533",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c095",
+"name": "Sabine Teschner",
+"email": "kontakt@steschner.de",
+"phone": "+49015154997878",
+"leadDate": "2023-08-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c096",
+"name": "Franziska Hufnagel",
+"email": "franziska.hufnagel@thermomix-kundenberatung.de",
+"phone": "+4915251769225",
+"leadDate": "2023-08-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c097",
+"name": "Berta Resch",
+"email": "Your_lady_2007@web.de",
+"phone": "+49017641898063",
+"leadDate": "2023-08-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c098",
+"name": "Emily Wotzka",
+"email": "emily_stumpf@yahoo.de",
+"phone": "+491724345962",
+"leadDate": "2023-08-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c099",
+"name": "Markus Kopietz",
+"email": "ma.kopietz@t-online.de",
+"phone": "+49015167114666",
+"leadDate": "2023-08-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c100",
+"name": "Volker Adrian",
+"email": "Volker.adrian@yahoo.de",
+"phone": "=+49177 83523776",
+"leadDate": "2023-08-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c101",
+"name": "Sophie Steinhauer",
+"email": "sophiesteinhauer@gmx.de",
+"phone": "+491792135556",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c102",
+"name": "Michael Bresler",
+"email": "m.bresler@arcor.de",
+"phone": "+4901795996793",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c103",
+"name": "Marco Matthes",
+"email": "marco.m1982@freenet.de",
+"phone": "+4916096011585",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c104",
+"name": "Miriam Haberer",
+"email": "mail@miriam-haberer.de",
+"phone": "+49033414494300",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c105",
+"name": "Marcel Seeger",
+"email": "seeger.marcel@gmail.com",
+"phone": "+4915119637365",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c106",
+"name": "Simone Guardiera",
+"email": "sguardiera@gmx.de",
+"phone": "+4901749746679",
+"leadDate": "2023-07-31",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c107",
+"name": "Jan Felsmann",
+"email": "Service@beamten-guru.de",
+"phone": "+4915158835214",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c108",
+"name": "Carolin Böhm",
+"email": "Caroitworks@web.de",
+"phone": "+4917621857137",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c109",
+"name": "Oliver Sauer",
+"email": "sauer.oliver@t-online.de",
+"phone": "+491704569380",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c110",
+"name": "Hans Hintz",
+"email": "HINTZ-LUEBECK@WEB.DE",
+"phone": "+4901606037996",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c111",
+"name": "Domenico Rubenbauer",
+"email": "rubens_1428@yahoo.com",
+"phone": "=+49173 426399",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c112",
+"name": "Julian Moosmann",
+"email": "julian.moosmann@gmx.de",
+"phone": "+49015127733993",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c113",
+"name": "Tino Daute",
+"email": "tino.daute@imb-gruppe.de",
+"phone": "+4901723139988",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c114",
+"name": "Christin Wegener",
+"email": "wegenerchristin499@gmail.com",
+"phone": "+4901726089713",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c115",
+"name": "Bernd Schwanitz",
+"email": "berndschwanitz@web.de",
+"phone": "+491791374745",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c116",
+"name": "Leo Mopalami",
+"email": "H.mopalami@gmx.de",
+"phone": "+4915774652345",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c117",
+"name": "Mika Wiese",
+"email": "mika.wiese.handy@googlemail.com",
+"phone": "+49016096677889",
+"leadDate": "2023-07-30",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c118",
+"name": "Malano Gmb H",
+"email": "Lars.nowak@malano.GmbH",
+"phone": "+4912346778",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c119",
+"name": "Markus Wahner",
+"email": "wahner72@me.com",
+"phone": "+4915234210453",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c120",
+"name": "Steffen Höing",
+"email": "hoeing.steffen@gmail.com",
+"phone": "=+493377 204222",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c121",
+"name": "Yakup Aksu",
+"email": "yea8283@outlook.de",
+"phone": "+4901705713121",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c122",
+"name": "Alexander Jerusalem",
+"email": "jerusalemalex@aol.com",
+"phone": "=+49157 51929912",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c123",
+"name": "Andreas Heß",
+"email": "andi-hess@gmx.de",
+"phone": "+4901727954156",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c124",
+"name": "Edgar Stebner",
+"email": "daranursg1@gmail.com",
+"phone": "+491636239619",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c125",
+"name": "Cindy Thigpen",
+"email": "ba_katja@yahoo.com",
+"phone": "+4901754076650",
+"leadDate": "2023-07-29",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c126",
+"name": "Can-Furkan Polat",
+"email": "cfp.xd16@gmail.com",
+"phone": "+49015259328300",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c127",
+"name": "Chris Djafari",
+"email": "cd.christopherdjafari@outllook.de",
+"phone": "+4917634902833",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c128",
+"name": "Ronald Villmann",
+"email": "ronald.villmann@barmenia.de",
+"phone": "=+49170 4991213",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c129",
+"name": "Jens Donaubauer",
+"email": "jensdonaubauer@gmail.com",
+"phone": "+491605717515",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c130",
+"name": "Mika Wiese",
+"email": "mika.wiese.handy@googlemail.com",
+"phone": "+49016096677889",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c131",
+"name": "Andreas Spang",
+"email": "asp2871@me.com",
+"phone": "+4900000000000",
+"leadDate": "2023-07-28",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c132",
+"name": "Dennis R. Paiska",
+"email": "dpaiska@web.de",
+"phone": "+491621587788",
+"leadDate": "2023-07-27",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c133",
+"name": "Daniela Basener",
+"email": "daniela.basener@googlemail.com",
+"phone": "+4915172322152",
+"leadDate": "2023-07-27",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c134",
+"name": "Gerd Matthes",
+"email": "Gm@gerd-matthes.de",
+"phone": "=+496167 7684",
+"leadDate": "2023-07-26",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c135",
+"name": "Gabriel Kosinski",
+"email": "Kosinskigabriel@gmail.com",
+"phone": "+4915752471977",
+"leadDate": "2023-07-25",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c136",
+"name": "Anna Hobitz",
+"email": "anna.hobitz@gmail.com",
+"phone": "+4915783551010",
+"leadDate": "2023-07-25",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c137",
+"name": "Kianoosh Nassimi",
+"email": "ki.nas@web.de",
+"phone": "+49017661690451",
+"leadDate": "2023-07-25",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c138",
+"name": "Martin Grübl",
+"email": "m.bimek1986@googlemail.com",
+"phone": "+491729864062",
+"leadDate": "2023-07-25",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c139",
+"name": "Nicole Götzendörfer",
+"email": "nicole.goetzendoerfer@yahoo.com",
+"phone": "+4901785183089",
+"leadDate": "2023-07-24",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c140",
+"name": "Carlo Schön",
+"email": "schoen.carlo@gmail.com",
+"phone": "+4901522856187",
+"leadDate": "2023-07-24",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c141",
+"name": "Nora Thies",
+"email": "nora.thies@gmail.com",
+"phone": "+4915906151696",
+"leadDate": "2023-07-24",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c142",
+"name": "Arthur Czekajlo",
+"email": "artczek@web.de",
+"phone": "=+49531 387864",
+"leadDate": "2023-07-24",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c143",
+"name": "Alexander Thoma",
+"email": "alexanderthoma92@gmail.com",
+"phone": "+4915908466327",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c144",
+"name": "Mirza Numanovic",
+"email": "arbeit3007@gmail.com",
+"phone": "+4915168153007",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c145",
+"name": "Niklas Graf",
+"email": "Ng@gvd.solar",
+"phone": "+4959191197058",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c146",
+"name": "Christoph Korn",
+"email": "c.r.o.korn@googlemail.com",
+"phone": "+491723717147",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c147",
+"name": "Francesco Incarbone",
+"email": "Francoringo2005@yahoo.de",
+"phone": "+4915141397028",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c148",
+"name": "Viktoria Janke",
+"email": "ruby76@gmx.net",
+"phone": "+4915207590284",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c149",
+"name": "Viktor Allerdings",
+"email": "viktor-allerdings@web.de",
+"phone": "+4901628734192",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c150",
+"name": "Marcai Beyer",
+"email": "marcaibeyer@googlemail.com",
+"phone": "=+490178 4036575",
+"leadDate": "2023-07-23",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c151",
+"name": "Rene Hammer",
+"email": "rene.drechsel@live.de",
+"phone": "+4901705834447",
+"leadDate": "2023-07-22",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c152",
+"name": "Rita Stegmann",
+"email": "mail.1@gmx.net",
+"phone": "+498154711",
+"leadDate": "2023-07-22",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c153",
+"name": "Florian Schwert",
+"email": "Schwert31@gmail.com",
+"phone": "+490172275568",
+"leadDate": "2023-07-22",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c154",
+"name": "Helma Holey",
+"email": "helma@holeyconsulting.com",
+"phone": "+49015223339992",
+"leadDate": "2023-07-22",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c155",
+"name": "Alexander Krull",
+"email": "akhhbd@gmail.com",
+"phone": "+491717798077",
+"leadDate": "2023-07-21",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c156",
+"name": "Sabrina Hück",
+"email": "sabrinahueck@gmx.de",
+"phone": "+491749087693",
+"leadDate": "2023-07-21",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c157",
+"name": "Steven Janecki",
+"email": "steven_janecki@web.de",
+"phone": "+4915254185714",
+"leadDate": "2023-07-21",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c158",
+"name": "Sarah Bentzen",
+"email": "weickert93@gmail.com",
+"phone": "+4915774706332",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c159",
+"name": "Linda Kalendzhiev",
+"email": "lkalenji@ymail.com",
+"phone": "+4901748625567",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c160",
+"name": "Armen Zidi",
+"email": "ZIdi.armen@icloud.com",
+"phone": "+491726969910",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c161",
+"name": "Lea Torfstecher",
+"email": "lea.torfstecher118@outlook.de",
+"phone": "+4901736771857",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c162",
+"name": "Cheyenne Wenzel",
+"email": "c.s.wenzel98@gmail.com",
+"phone": "+4917687936063",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c163",
+"name": "Yanal Gözen",
+"email": "yanal.goezen@outlook.de",
+"phone": "+491632000043",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c164",
+"name": "Sven (Timo Sven Bauer Buch) Drauwe",
+"email": "Fotodesign@Drauwe.com",
+"phone": "+490000000000",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c165",
+"name": "Nikolas Böttcher",
+"email": "Nikyoulix@googlemail.com",
+"phone": "+4915735809154",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c166",
+"name": "Jagadish Paudel",
+"email": "pdl_jagadish@yahoo.com",
+"phone": "+49157388617",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c167",
+"name": "Fritz Riemerscheidt",
+"email": "F.Riemerscheidt@gmail.com",
+"phone": "+491716831577",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c168",
+"name": "Günter Berger",
+"email": "guenter.berger52@gmail.com",
+"phone": "+49017634352268",
+"leadDate": "2023-07-20",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c169",
+"name": "Michelle Dupont",
+"email": "Michelledupont20@googlemail.com",
+"phone": "+4917620173188",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c170",
+"name": "Felix Willer",
+"email": "felix@hypnose-willer.de",
+"phone": "+49017680480755",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c171",
+"name": "Marco Krille",
+"email": "krille.m@outlook.de",
+"phone": "=+49152 28437857",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c172",
+"name": "Stefan Ehmke",
+"email": "Kontakt@ehb24.de",
+"phone": "+491737225050",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c173",
+"name": "Kathrin Krüger",
+"email": "kkruegerhh@gmail.com",
+"phone": "+4901715450650",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c174",
+"name": "Mirko Giesler",
+"email": "Mirko.giesler@outlook.de",
+"phone": "+49015125068621",
+"leadDate": "2023-07-19",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c175",
+"name": "Niclas Sonnen",
+"email": "niclas.sonnen@yahao.de",
+"phone": "+491733770639",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c176",
+"name": "Alexander Will",
+"email": "Alexander-m.will@gmx.de",
+"phone": "+4915777732644",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c177",
+"name": "Hannes Lachauer",
+"email": "Hannes.lachauer@gmx.de",
+"phone": "+4917661980702",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c178",
+"name": "Marco Woldt",
+"email": "Marco.woldt@gmail.com",
+"phone": "+49015233587908",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c179",
+"name": "Efe Aydin",
+"email": "efe.81@hotmail.de",
+"phone": "+4915775442003",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c180",
+"name": "David Scherf",
+"email": "scherfdavid@web.de",
+"phone": "+491714141880",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c181",
+"name": "Tsima Bolik",
+"email": "tsima.bolik@gmail.com",
+"phone": "+49015777311390",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c182",
+"name": "Dirk Käfer",
+"email": "Dirk.kaefer@gmx.de",
+"phone": "+4915233540299",
+"leadDate": "2023-07-18",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c183",
+"name": "Angela Hartmann",
+"email": "Angela.hartmann@justmail.de",
+"phone": "+491634716546",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c184",
+"name": "Franz Fischinger",
+"email": "franz.fischinger-home@outlook.de",
+"phone": "+49017643357889",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c185",
+"name": "Maurice Küffner",
+"email": "Allround-solutions@hotmail.de",
+"phone": "+4901782849212",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c186",
+"name": "Melissa Wegert",
+"email": "melissa_wegert@yahoo.de",
+"phone": "+4917687095657",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c187",
+"name": "Sven Sommerfeld",
+"email": "sven.s1509@live.de",
+"phone": "+4901713413922",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c188",
+"name": "Jacqueline Dietze-Urban",
+"email": "dietzeurban@gmail.com",
+"phone": "+49017664686271",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c189",
+"name": "Yasin Kaouache",
+"email": "M.watches@web.de",
+"phone": "+49163892010",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c190",
+"name": "Tim Gleim",
+"email": "Tgl7@gmx.de",
+"phone": "+49179314496",
+"leadDate": "2023-07-17",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c191",
+"name": "Stephanie Böttcher",
+"email": "Contact@spots-group.com",
+"phone": "=+49162 164 3808",
+"leadDate": "2023-07-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c192",
+"name": "Tanja Schlattmann",
+"email": "tanja.schlattmann@gmail.com",
+"phone": "+49015233769004",
+"leadDate": "2023-07-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c193",
+"name": "Magdalene Breitnauer",
+"email": "magda.breitnauer@gmail.com",
+"phone": "+4901736906337",
+"leadDate": "2023-07-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c194",
+"name": "Alexander Weigant",
+"email": "alexander-weigant@web.de",
+"phone": "+4915738173095",
+"leadDate": "2023-07-16",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c195",
+"name": "Jan Koopmann",
+"email": "jankoopmann1@gmail.com",
+"phone": "+4917623984679",
+"leadDate": "2023-07-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c196",
+"name": "Marion Asenime- Wonnenberg",
+"email": "Marion.asenime@gmail.com",
+"phone": "+491772338668",
+"leadDate": "2023-07-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c197",
+"name": "Jaxx Zupljanin",
+"email": "Jovicaz@hotmail.de",
+"phone": "+4915129121263",
+"leadDate": "2023-07-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c198",
+"name": "Testlauf Testlauf",
+"email": "Bti.Timobauer@hotmail.de",
+"phone": "=+4.91739474627318E+21",
+"leadDate": "2023-07-15",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c199",
+"name": "Senay Yilmaz",
+"email": "senayyilmaz@hotmail.de",
+"phone": "+4901736089059",
+"leadDate": "2023-07-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c200",
+"name": "Carsten Faeth",
+"email": "carsten.faeth@gmx.de",
+"phone": "+491701234567",
+"leadDate": "2023-07-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c201",
+"name": "Stefanie Koch",
+"email": "info@faltcampcenter.de",
+"phone": "+491742484201",
+"leadDate": "2023-07-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c202",
+"name": "Alessandro Gravano",
+"email": "a.gtavano@yahoo.de",
+"phone": "+49937191198500",
+"leadDate": "2023-07-14",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c203",
+"name": "Valentino Dore",
+"email": "v@valentinodore.com",
+"phone": "+4915253054304",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c204",
+"name": "Mart Wom",
+"email": "Copecart@wo-m.de",
+"phone": "+4953100000",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c205",
+"name": "Alban Ademaj",
+"email": "alb.ademaj@gmx.de",
+"phone": "+491727822056",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c206",
+"name": "Christian Wittenzellner",
+"email": "christian.wittenzellner92@googlemail.com",
+"phone": "+4915231886025",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c207",
+"name": "John Kunze",
+"email": "John.kunze@yahoo.de",
+"phone": "+491111119999",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c208",
+"name": "Blerta Morina",
+"email": "blertamo20@gmail.com",
+"phone": "=+49152 82548876",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c209",
+"name": "Nihat Asil",
+"email": "nihat.6692@gmail.com",
+"phone": "+4915757057976",
+"leadDate": "2023-07-13",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c210",
+"name": "Vitalie Simanschi",
+"email": "shimanvitalik@gmail.com",
+"phone": "+4915237134716",
+"leadDate": "2023-07-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c211",
+"name": "Johannes Pfeiffer",
+"email": "j.pfeiffer81@googlemail.com",
+"phone": "+491775690576",
+"leadDate": "2023-07-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c212",
+"name": "Jessika Schirmer",
+"email": "t-jessika@web.de",
+"phone": "+4916096238258",
+"leadDate": "2023-07-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c213",
+"name": "Test Bauer",
+"email": "Bti.Timobauer@hotmail.de",
+"phone": "+491445455",
+"leadDate": "2023-07-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c214",
+"name": "Linus Dasting",
+"email": "linuda@icloud.com",
+"phone": "+4915223191998",
+"leadDate": "2023-07-12",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c215",
+"name": "Nadine Stockner",
+"email": "stocke@hotmail.de",
+"phone": "+491735602627",
+"leadDate": "2023-07-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c216",
+"name": "Maria Warda",
+"email": "Maria.w.31@web.de",
+"phone": "+4915731532871",
+"leadDate": "2023-07-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c217",
+"name": "Carsten Volk",
+"email": "Carsten.volk@web.de",
+"phone": "+4901736567856",
+"leadDate": "2023-07-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c218",
+"name": "Christine Brüning",
+"email": "Workforyourowndreams@gmail.com",
+"phone": "+49016095936934",
+"leadDate": "2023-07-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c219",
+"name": "Kristof Ital",
+"email": "kristof@ital-network-sales-services.com",
+"phone": "+491737497473",
+"leadDate": "2023-07-11",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c220",
+"name": "Nicole Feix",
+"email": "nicolefeix1989@live.de",
+"phone": "+4915256074749",
+"leadDate": "2023-07-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c221",
+"name": "Oliver Mösing",
+"email": "oliver@kowerk.de",
+"phone": "+4901723163131",
+"leadDate": "2023-07-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c222",
+"name": "Simone Mathes",
+"email": "simone.martus@web.de",
+"phone": "+491732165019",
+"leadDate": "2023-07-10",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c223",
+"name": "Armin Ettwein",
+"email": "armet13@hotmail.com",
+"phone": "+491772820122",
+"leadDate": "2023-07-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c224",
+"name": "Mike Stöver",
+"email": "stoever.malermeister@gmx.de",
+"phone": "+4901743424999",
+"leadDate": "2023-07-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c225",
+"name": "Daniel Meyer",
+"email": "daniel.hamburg83@googlemail.com",
+"phone": "+49017656503628",
+"leadDate": "2023-07-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c226",
+"name": "Tobias Becht",
+"email": "tobi_becht@yahoo.de",
+"phone": "+4901797263181",
+"leadDate": "2023-07-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c227",
+"name": "Oliver Zenz",
+"email": "oliver.zenz@web.de",
+"phone": "+491738520975",
+"leadDate": "2023-07-09",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c228",
+"name": "Constanze Lange",
+"email": "Lange-constanze@web.de",
+"phone": "+49015122841292",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c229",
+"name": "Boris Bertelsons",
+"email": "info@bertelsons.de",
+"phone": "+4917634446648",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c230",
+"name": "Alice Richert",
+"email": "info@alice-richert.de",
+"phone": "+491781858157",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c231",
+"name": "Nergis Sükür",
+"email": "Nergis.suekuer@web.de",
+"phone": "+4901753564410",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c232",
+"name": "Sascha Dittrich",
+"email": "sascha-d-84@web.de",
+"phone": "+4901722831749",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c233",
+"name": "Marco Hüning",
+"email": "Marco-huening@t-online.de",
+"phone": "+4915906441338",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c234",
+"name": "Achim Kneifel",
+"email": "kneifel@wefapress.com",
+"phone": "+491702043821",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c235",
+"name": "Anna Isernhinke",
+"email": "anna@erbsenzaehler.net",
+"phone": "+4917661209633",
+"leadDate": "2023-07-08",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c236",
+"name": "Celiano Brunkartz",
+"email": "C.brunkartz@gmx.de",
+"phone": "+491752836382527",
+"leadDate": "2023-07-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c237",
+"name": "Marco Meinert",
+"email": "marco.meinert@googlemail.com",
+"phone": "+49174695712",
+"leadDate": "2023-07-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c238",
+"name": "Dominik Delinic",
+"email": "dominikdelinic@gmail.com",
+"phone": "+49725391177743",
+"leadDate": "2023-07-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c239",
+"name": "Miriam Sarah Popescu",
+"email": "miriamsarahpopescu@gmail.com",
+"phone": "+4901743053922",
+"leadDate": "2023-07-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c240",
+"name": "Mi Sipahi",
+"email": "elasbeautylight@gmail.com",
+"phone": "+49015245157420",
+"leadDate": "2023-07-07",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c241",
+"name": "Tobias Kempf",
+"email": "tobias.kempf@ke.de",
+"phone": "+4915142261196",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c242",
+"name": "Anja Mehlhase",
+"email": "anja.mehlhase89@gmail.com",
+"phone": "+4917624752545",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c243",
+"name": "Birgit Müller",
+"email": "birgitmueller76@web.de",
+"phone": "+49015774022056",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": []
+},
+{
+"id": "c244",
+"name": "Roberto Cipolla",
+"email": "r.cipolla@web.de",
+"phone": "+49015753680143",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n244",
+"text": "Nicht erreicht",
+"date": "2023-07-06",
+"type": "import"
+}
+]
+},
+{
+"id": "c245",
+"name": "Björn Treutmann",
+"email": "dsmaw@gmx.de",
+"phone": "+4916091959457",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n245",
+"text": "Nicht erreicht",
+"date": "2023-07-06",
+"type": "import"
+}
+]
+},
+{
+"id": "c246",
+"name": "Jeanette Krampe",
+"email": "jeanettekrampe@gmx.de",
+"phone": "=+491577 17 26 417",
+"leadDate": "2023-07-06",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n246",
+"text": "keine Nummer",
+"date": "2023-07-06",
+"type": "import"
+}
+]
+},
+{
+"id": "c247",
+"name": "Ann Britt Lork",
+"email": "lorki@hotmail.de",
+"phone": "+4917656875590",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n247",
+"text": "Nicht erreicht",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c248",
+"name": "Irina Dechant",
+"email": "idee2001@aol.com",
+"phone": "+4915209719001",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n248",
+"text": "Nicht erreicht",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c249",
+"name": "Marc Zehetleitner",
+"email": "M.zehetleitner@web.de",
+"phone": "+49618733601",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n249",
+"text": "keine Nummer",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c250",
+"name": "Layla Galal",
+"email": "layla.galal@yahoo.de",
+"phone": "+4917662625359",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n250",
+"text": "Nicht erreicht",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c251",
+"name": "Karim Bühner",
+"email": "Karim.buehner@gmail.com",
+"phone": "+4901737281463",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n251",
+"text": "Terminvorschlag Ende Aprill",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c252",
+"name": "Bogdans Zubs",
+"email": "zubs@gmx.de",
+"phone": "=+490176 84606263",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n252",
+"text": "keine Nummer",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c253",
+"name": "Mandy Breuer",
+"email": "mandy.breuer@gmx.de",
+"phone": "+4901624077354",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n253",
+"text": "Keine Nummer",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c254",
+"name": "Kyrill Belov",
+"email": "Belovkyrill@hotmail.de",
+"phone": "+49152219268884",
+"leadDate": "2023-07-05",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n254",
+"text": "keine Nummer",
+"date": "2023-07-05",
+"type": "import"
+}
+]
+},
+{
+"id": "c255",
+"name": "Matthias Zenzner",
+"email": "zenzner@googlemail.com",
+"phone": "=+491520 9124133",
+"leadDate": "2023-07-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n255",
+"text": "keine Nummer",
+"date": "2023-07-04",
+"type": "import"
+}
+]
+},
+{
+"id": "c256",
+"name": "Mike Albrecht",
+"email": "Mikealbrecht3@gmail.com",
+"phone": "+4917637673791",
+"leadDate": "2023-07-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n256",
+"text": "Job und einen Nebenjob -Kein Interesse",
+"date": "2023-07-04",
+"type": "import"
+}
+]
+},
+{
+"id": "c257",
+"name": "Mike Sen Gupta",
+"email": "mike_sen_gupta@gmx.net",
+"phone": "+4901796306300",
+"leadDate": "2023-07-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n257",
+"text": "Nicht erreicht",
+"date": "2023-07-04",
+"type": "import"
+}
+]
+},
+{
+"id": "c258",
+"name": "Janina Metz",
+"email": "Janinametz@gmx.de",
+"phone": "+49160987890",
+"leadDate": "2023-07-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n258",
+"text": "Nummer nicht vergeben",
+"date": "2023-07-04",
+"type": "import"
+}
+]
+},
+{
+"id": "c259",
+"name": "Miroslav Bilbija",
+"email": "M.bilbija@gmx.de",
+"phone": "+4917622071036",
+"leadDate": "2023-07-04",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n259",
+"text": "kein Interesse",
+"date": "2023-07-04",
+"type": "import"
+}
+]
+},
+{
+"id": "c260",
+"name": "Anna Leitner",
+"email": "leitneranna2017@gmail.com",
+"phone": "+491758217004",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n260",
+"text": "Hat ihr Geschäft zu gemacht - kein Interesse",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c261",
+"name": "Tom Pracht",
+"email": "tompracht98@gmail.com",
+"phone": "+491636756403",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n261",
+"text": "Nicht erreicht",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c262",
+"name": "Natalie Mueller",
+"email": "eco.tuecher.gw@gmail.com",
+"phone": "+491789829747",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n262",
+"text": "Nicht erreicht",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c263",
+"name": "Lars Graf",
+"email": "info@larsgraf.com",
+"phone": "=+492241 12757",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n263",
+"text": "Keine Nummer",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c264",
+"name": "Maurice Ferge",
+"email": "mauriceferge@gmail.com",
+"phone": "+4917641311555",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n264",
+"text": "Hammer Type - Call die tage ausmachen",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c265",
+"name": "Nico Heinze",
+"email": "nicoheinze165@googlemail.com",
+"phone": "+491727711377",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n265",
+"text": "kein Interesse - Ist Elektriker -",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c266",
+"name": "Robin Bergmann",
+"email": "service@big-rendite.de",
+"phone": "+4915150492461",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n266",
+"text": "Nicht erreicht",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c267",
+"name": "Alexander Richter",
+"email": "Lx_Richter@web.de",
+"phone": "=+49163 1737743",
+"leadDate": "2023-07-03",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n267",
+"text": "keine Nummer",
+"date": "2023-07-03",
+"type": "import"
+}
+]
+},
+{
+"id": "c268",
+"name": "Michael Bischoff",
+"email": "Bischoff_Michael@web.de",
+"phone": "+491788599911",
+"leadDate": "2023-07-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n268",
+"text": "Nicht erreicht",
+"date": "2023-07-02",
+"type": "import"
+}
+]
+},
+{
+"id": "c269",
+"name": "Katrin Hermann",
+"email": "katrinhermann147@gmail.com",
+"phone": "+491721048634",
+"leadDate": "2023-07-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n269",
+"text": "Mailbox",
+"date": "2023-07-02",
+"type": "import"
+}
+]
+},
+{
+"id": "c270",
+"name": "Wolfgang Beckert",
+"email": "Beratung.beckert@gmail.com",
+"phone": "+491715010859",
+"leadDate": "2023-07-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n270",
+"text": "Nicht erreicht",
+"date": "2023-07-02",
+"type": "import"
+}
+]
+},
+{
+"id": "c271",
+"name": "Marcel Voß",
+"email": "Vcds@me.com",
+"phone": "+4903574124455",
+"leadDate": "2023-07-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n271",
+"text": "Keine Nummer",
+"date": "2023-07-02",
+"type": "import"
+}
+]
+},
+{
+"id": "c272",
+"name": "Marianne Fisch",
+"email": "jannefisch@gmail.com",
+"phone": "+491782592558",
+"leadDate": "2023-07-02",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n272",
+"text": "Keine Nummer",
+"date": "2023-07-02",
+"type": "import"
+}
+]
+},
+{
+"id": "c273",
+"name": "Edlef Lange",
+"email": "edleflange@web.de",
+"phone": "+491622693034",
+"leadDate": "2023-07-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n273",
+"text": "Nicht erreicht",
+"date": "2023-07-01",
+"type": "import"
+}
+]
+},
+{
+"id": "c274",
+"name": "Martina Schöneich",
+"email": "ma-gu@web.de",
+"phone": "+49040000000000",
+"leadDate": "2023-07-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n274",
+"text": "keine Nummer",
+"date": "2023-07-01",
+"type": "import"
+}
+]
+},
+{
+"id": "c275",
+"name": "Susanna Hagin",
+"email": "shcalte13@gmail.com",
+"phone": "+491775638804",
+"leadDate": "2023-07-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n275",
+"text": "nicht erreicht",
+"date": "2023-07-01",
+"type": "import"
+}
+]
+},
+{
+"id": "c276",
+"name": "Seb Küster",
+"email": "fkfb@gmx.de",
+"phone": "+4915283838177",
+"leadDate": "2023-07-01",
+"stage": "new",
+"priority": "cold",
+"nextAction": "",
+"nextActionDate": "",
+"linkSentDate": "",
+"funnelStatus": "",
+"lastContactDate": "",
+"notes": [
+{
+"id": "n276",
+"text": "Keine Nummer",
+"date": "2023-07-01",
+"type": "import"
+}
+]
+}
+];
+
+// Note: Full 276 contacts are embedded in the deployed version.
+// For brevity in this file, only 10 are shown as template.
+// The actual file you deploy should contain all contacts.
+// Use the "Import" button in the app to load them from the React version,
+// or paste the full list here before deploying.
+
+// ============================================================
+// INIT
+// ============================================================
+
+render();
+if (state.apiUrl) {
+  loadContacts();
+}
+</script>
+</body>
+</html>
